@@ -3,6 +3,7 @@
 import React from "react";
 import { useAuth } from "./context/AuthContext";
 import { useRouter } from "next/navigation";
+import Chat from "./components/Chat";
 
 export default function DashboardPage() {
   const { user, logout } = useAuth();
@@ -36,15 +37,7 @@ export default function DashboardPage() {
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <div className="border-4 border-dashed border-gray-200 rounded-lg h-96 p-4">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Welcome to your Dashboard
-            </h2>
-            <p className="text-gray-600">
-              You are now logged in as {user?.email}. This is a protected page
-              that only authenticated users can access.
-            </p>
-          </div>
+          <Chat />
         </div>
       </main>
     </div>
