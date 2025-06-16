@@ -3,6 +3,12 @@ import { User } from "../types/auth";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
+interface JWTPayload {
+  id: string;
+  email: string;
+  name: string;
+}
+
 export const generateToken = (user: Omit<User, "password">): string => {
   return jwt.sign(
     { id: user.id, email: user.email, name: user.name },
@@ -11,10 +17,10 @@ export const generateToken = (user: Omit<User, "password">): string => {
   );
 };
 
-export const verifyToken = (token: string): any => {
+export const verifyToken = (token: string): JWTPayload | null => {
   try {
-    return jwt.verify(token, JWT_SECRET);
-  } catch (error) {
+    return jwt.verify(token, JWT_SECRET) as JWTPayload;
+  } catch {
     return null;
   }
 };

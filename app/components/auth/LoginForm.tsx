@@ -32,8 +32,12 @@ export default function LoginForm() {
         throw new Error(data.error || "Login failed");
       }
 
+      if (!data.token || !data.user) {
+        throw new Error("Invalid response from server");
+      }
+
       login(data.token, data.user);
-      router.push("/dashboard");
+      router.push("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {

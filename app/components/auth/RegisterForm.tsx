@@ -23,6 +23,11 @@ export default function RegisterForm() {
       return;
     }
 
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -40,8 +45,12 @@ export default function RegisterForm() {
         throw new Error(data.error || "Registration failed");
       }
 
+      if (!data.token || !data.user) {
+        throw new Error("Invalid response from server");
+      }
+
       login(data.token, data.user);
-      router.push("/dashboard");
+      router.push("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {

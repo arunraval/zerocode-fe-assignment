@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { RegisterRequest, AuthResponse } from "@/app/types/auth";
-import { createUser } from "@/app/utils/userStore";
+import { createUser, findUserByEmail } from "@/app/utils/userStore";
 import { generateToken } from "@/app/utils/jwt";
 
 export async function POST(request: Request) {
@@ -13,6 +13,15 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
+      );
+    }
+
+    // Check if user already exists
+    const existingUser = findUserByEmail(email);
+    if (existingUser) {
+      return NextResponse.json(
+        { error: "User with this email already exists" },
+        { status: 409 }
       );
     }
 
@@ -31,8 +40,9 @@ export async function POST(request: Request) {
       },
     };
 
-    return NextResponse.json(response);
+    return NextResponse.json(response, { status: 201 });
   } catch (error) {
+    console.error("Registration error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

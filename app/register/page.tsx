@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import RegisterForm from "../components/auth/RegisterForm";
 import Link from "next/link";
 import { useAuth } from "../context/AuthContext";
@@ -10,10 +10,9 @@ export default function RegisterPage() {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
 
-  // Redirect if already authenticated
-  React.useEffect(() => {
+  useEffect(() => {
     if (isAuthenticated) {
-      router.push("/dashboard");
+      router.push("/");
     }
   }, [isAuthenticated, router]);
 
