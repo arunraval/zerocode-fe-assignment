@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-// import { jsPDF } from "jspdf";
-// import { saveAs } from "file-saver";
+import { jsPDF } from "jspdf";
+import { saveAs } from "file-saver";
 
 interface Message {
   role: "user" | "assistant";
@@ -46,7 +46,6 @@ export default function Chat() {
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   useEffect(() => {
-    // Initialize Web Speech API
     if ("webkitSpeechRecognition" in window) {
       recognitionRef.current = new window.webkitSpeechRecognition();
       recognitionRef.current.continuous = false;
@@ -114,9 +113,7 @@ export default function Chat() {
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error("Error sending message:", error);
-      setError(
-        error instanceof Error ? error.message : "Failed to send message"
-      );
+      setError(error instanceof Error ? error.message : "Failed to send message");
     } finally {
       setIsTyping(false);
     }
@@ -136,26 +133,46 @@ export default function Chat() {
     }
   };
 
-  //   const exportChat = () => {
-  //     const doc = new jsPDF();
-  //     let yOffset = 10;
+  const exportChat = () => {
+    const doc = new jsPDF();
+    let yOffset = 10;
 
-  //     messages.forEach((msg) => {
-  //       const text = `${msg.role}: ${msg.content}`;
-  //       doc.text(text, 10, yOffset);
-  //       yOffset += 10;
-  //     });
+    messages.forEach((msg) => {
+      const timestamp = msg.timestamp.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      const text = `${msg.role.toUpperCase()} [${timestamp}]: ${msg.content}`;
 
-  //     const pdfBlob = doc.output("blob");
-  //     saveAs(pdfBlob, "chat-export.pdf");
-  //   };
+      const lines = doc.splitTextToSize(text, 180);
+      lines.forEach((line: string) => {
+        if (yOffset > 280) {
+          doc.addPage();
+          yOffset = 10;
+        }
+        doc.text(line, 10, yOffset);
+        yOffset += 10;
+      });
+    });
+
+    const pdfBlob = doc.output("blob");
+    saveAs(pdfBlob, "chat-export.pdf");
+  };
 
   return (
     <div className="flex flex-col h-[80vh] max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
       {/* Chat Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white">
-        <h2 className="text-xl font-semibold">AI Chat Assistant</h2>
-        <p className="text-sm opacity-80">Ask me anything!</p>
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white flex justify-between items-center">
+        <div>
+          <h2 className="text-xl font-semibold">AI Chat Assistant</h2>
+          <p className="text-sm opacity-80">Ask me anything!</p>
+        </div>
+        <button
+          onClick={exportChat}
+          className="bg-white text-blue-600 px-3 py-1 rounded-full text-sm hover:bg-blue-50"
+        >
+          Export Chat
+        </button>
       </div>
 
       {/* Messages Container */}
@@ -168,9 +185,7 @@ export default function Chat() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className={`flex ${
-                msg.role === "user" ? "justify-end" : "justify-start"
-              }`}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
                 className={`max-w-[70%] rounded-2xl p-4 ${
@@ -180,12 +195,11 @@ export default function Chat() {
                 }`}
               >
                 <p className="text-sm mb-1">{msg.content}</p>
-                <p
-                  className={`text-xs ${
-                    msg.role === "user" ? "text-blue-100" : "text-gray-500"
-                  }`}
-                >
-                  {msg.timestamp.toLocaleTimeString()}
+                <p className={`text-xs ${msg.role === "user" ? "text-blue-100" : "text-gray-500"}`}>
+                  {msg.timestamp.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </p>
               </div>
             </motion.div>
@@ -214,9 +228,7 @@ export default function Chat() {
             animate={{ opacity: 1 }}
             className="flex justify-center"
           >
-            <div className="bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm">
-              {error}
-            </div>
+            <div className="bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm">{error}</div>
           </motion.div>
         )}
 
@@ -240,9 +252,7 @@ export default function Chat() {
               onClick={toggleVoiceInput}
               disabled={isTyping}
               className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full transition-colors ${
-                isListening
-                  ? "bg-red-500 hover:bg-red-600"
-                  : "bg-gray-100 hover:bg-gray-200"
+                isListening ? "bg-red-500 hover:bg-red-600" : "bg-gray-100 hover:bg-gray-200"
               } ${isTyping ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               <svg
@@ -265,9 +275,7 @@ export default function Chat() {
             onClick={() => handleSendMessage(input)}
             disabled={isTyping || !input.trim()}
             className={`p-3 bg-blue-600 text-white rounded-full transition-colors ${
-              isTyping || !input.trim()
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-blue-700"
+              isTyping || !input.trim() ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
             }`}
           >
             <svg

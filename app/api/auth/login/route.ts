@@ -10,28 +10,19 @@ export async function POST(request: Request) {
 
     // Basic validation
     if (!email || !password) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     // Find user
     const user = findUserByEmail(email);
     if (!user) {
-      return NextResponse.json(
-        { error: "Invalid email or password" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
 
     // Verify password
     const isValidPassword = await verifyPassword(password, user.password);
     if (!isValidPassword) {
-      return NextResponse.json(
-        { error: "Invalid email or password" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
 
     // Generate token
@@ -49,9 +40,6 @@ export async function POST(request: Request) {
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
     console.error("Login error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

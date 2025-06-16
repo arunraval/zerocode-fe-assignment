@@ -10,19 +10,13 @@ export async function POST(request: Request) {
 
     // Basic validation
     if (!email || !password || !name) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     // Check if user already exists
     const existingUser = findUserByEmail(email);
     if (existingUser) {
-      return NextResponse.json(
-        { error: "User with this email already exists" },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: "User with this email already exists" }, { status: 409 });
     }
 
     // Create user
@@ -43,9 +37,6 @@ export async function POST(request: Request) {
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
     console.error("Registration error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
