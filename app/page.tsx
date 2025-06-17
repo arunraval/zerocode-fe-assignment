@@ -23,7 +23,9 @@ export default function DashboardPage() {
               <h1 className="text-xl font-bold text-white">AI Chat Assistant</h1>
             </div>
             <div className="flex items-center">
-              <span className="text-white mr-4">Welcome, {user?.name}</span>
+              <span className="text-white mr-4">
+                Welcome, {user ? user.name : <span className="animate-pulse">...</span>}
+              </span>
               <button
                 onClick={handleLogout}
                 className="inline-flex items-center px-4 py-2 border border-white text-sm font-medium rounded-md text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white"
