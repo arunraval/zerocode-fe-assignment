@@ -48,7 +48,6 @@ export default function Chat() {
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const { user } = useAuth();
 
-  // Load messages from localStorage when component mounts or user changes
   useEffect(() => {
     const loadMessages = async () => {
       setIsLoadingHistory(true);
@@ -75,7 +74,6 @@ export default function Chat() {
     loadMessages();
   }, [user?.id]);
 
-  // Save messages to localStorage whenever they change
   useEffect(() => {
     if (user?.id && messages.length > 0) {
       try {
@@ -86,7 +84,6 @@ export default function Chat() {
     }
   }, [messages, user?.id]);
 
-  // Clear messages when user logs out
   useEffect(() => {
     if (!user) {
       setMessages([]);
@@ -208,49 +205,76 @@ export default function Chat() {
   };
 
   return (
-    <div className="flex flex-col h-[80vh] max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-      {/* Chat Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white flex justify-between items-center">
-        <div>
-          <h2 className="text-xl font-semibold">AI Chat Assistant</h2>
-          <p className="text-sm opacity-80">Ask me anything!</p>
-        </div>
+    <div className="flex flex-col h-[80vh] max-w-4xl mx-auto bg-white">
+      <div className="border-b border-gray-200 p-4 flex justify-between items-center">
+        <h2 className="text-xl font-semibold text-gray-800">AI Chat Assistant</h2>
         <button
           onClick={exportChat}
-          className="bg-white text-blue-600 px-3 py-1 rounded-full text-sm hover:bg-blue-50"
+          className="text-gray-600 hover:text-gray-800 text-sm flex items-center gap-1"
         >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+            />
+          </svg>
           Export Chat
         </button>
       </div>
 
-      {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+      <div className="flex-1 overflow-y-auto bg-white">
         {isLoadingHistory ? (
           <div className="flex justify-center items-center h-full">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800"></div>
           </div>
         ) : (
           <AnimatePresence>
             {messages.map((msg, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className={`flex items-start p-4 ${
+                  msg.role === "user" ? "bg-white" : "bg-gray-50"
+                }`}
               >
-                <div
-                  className={`max-w-[70%] rounded-2xl p-4 ${
-                    msg.role === "user"
-                      ? "bg-blue-600 text-white rounded-br-none"
-                      : "bg-white text-gray-800 rounded-bl-none shadow-md"
-                  }`}
-                >
-                  <p className="text-sm mb-1 whitespace-pre-wrap break-words">{msg.content}</p>
-                  <p
-                    className={`text-xs ${msg.role === "user" ? "text-blue-100" : "text-gray-500"}`}
-                  >
+                <div className="w-8 h-8 rounded-full flex items-center justify-center mr-4">
+                  {msg.role === "user" ? (
+                    <svg
+                      className="w-6 h-6 text-gray-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="w-6 h-6 text-green-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
+                    </svg>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <p className="text-gray-800 whitespace-pre-wrap break-words">{msg.content}</p>
+                  <p className="text-xs text-gray-500 mt-1">
                     {msg.timestamp.toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",
@@ -266,14 +290,27 @@ export default function Chat() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex justify-start"
+            className="flex items-start p-4 bg-gray-50"
           >
-            <div className="bg-white rounded-2xl rounded-bl-none p-4 shadow-md">
-              <div className="flex space-x-2">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100" />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200" />
-              </div>
+            <div className="w-8 h-8 rounded-full flex items-center justify-center mr-4">
+              <svg
+                className="w-6 h-6 text-green-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
+              </svg>
+            </div>
+            <div className="flex space-x-2">
+              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
+              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100" />
+              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200" />
             </div>
           </motion.div>
         )}
@@ -282,7 +319,7 @@ export default function Chat() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex justify-center"
+            className="flex justify-center p-4"
           >
             <div className="bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm">{error}</div>
           </motion.div>
@@ -291,16 +328,15 @@ export default function Chat() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
       <div className="border-t border-gray-200 p-4 bg-white">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 max-w-3xl mx-auto">
           <div className="flex-1 relative">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && handleSendMessage(input)}
-              className="w-full p-3 pr-12 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full p-3 pr-12 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all"
               placeholder="Type your message..."
               disabled={isTyping}
             />
@@ -330,8 +366,8 @@ export default function Chat() {
           <button
             onClick={() => handleSendMessage(input)}
             disabled={isTyping || !input.trim()}
-            className={`p-3 bg-blue-600 text-white rounded-full transition-colors ${
-              isTyping || !input.trim() ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
+            className={`p-3 bg-gray-800 text-white rounded-lg transition-colors ${
+              isTyping || !input.trim() ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-700"
             }`}
           >
             <svg
