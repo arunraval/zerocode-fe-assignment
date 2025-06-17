@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { jsPDF } from "jspdf";
 import { saveAs } from "file-saver";
+import { useAuth } from "../context/AuthContext";
 
 interface Message {
   role: "user" | "assistant";
@@ -44,6 +45,50 @@ export default function Chat() {
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const { user } = useAuth();
+
+  // Load messages from localStorage when component mounts or user changes
+  useEffect(() => {
+    const loadMessages = () => {
+      if (user?.id) {
+        const savedMessages = localStorage.getItem(`chatMessages_${user.id}`);
+        if (savedMessages) {
+          try {
+            const parsedMessages = JSON.parse(savedMessages).map((msg: Message) => ({
+              ...msg,
+              timestamp: new Date(msg.timestamp),
+            }));
+            setMessages(parsedMessages);
+          } catch (error) {
+            console.error("Error parsing saved messages:", error);
+            setMessages([]);
+          }
+        } else {
+          setMessages([]);
+        }
+      }
+    };
+
+    loadMessages();
+  }, [user?.id]);
+
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    if (user?.id && messages.length > 0) {
+      try {
+        localStorage.setItem(`chatMessages_${user.id}`, JSON.stringify(messages));
+      } catch (error) {
+        console.error("Error saving messages:", error);
+      }
+    }
+  }, [messages, user?.id]);
+
+  // Clear messages when user logs out
+  useEffect(() => {
+    if (!user) {
+      setMessages([]);
+    }
+  }, [user]);
 
   useEffect(() => {
     if ("webkitSpeechRecognition" in window) {

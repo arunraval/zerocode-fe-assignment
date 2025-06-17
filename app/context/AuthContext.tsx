@@ -43,6 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("user");
     // Remove token from cookie
     document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    // Note: We don't clear chat messages here anymore
   };
 
   return (
