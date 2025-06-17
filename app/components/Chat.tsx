@@ -43,13 +43,15 @@ export default function Chat() {
   const [isListening, setIsListening] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const { user } = useAuth();
 
   // Load messages from localStorage when component mounts or user changes
   useEffect(() => {
-    const loadMessages = () => {
+    const loadMessages = async () => {
+      setIsLoadingHistory(true);
       if (user?.id) {
         const savedMessages = localStorage.getItem(`chatMessages_${user.id}`);
         if (savedMessages) {
@@ -67,6 +69,7 @@ export default function Chat() {
           setMessages([]);
         }
       }
+      setIsLoadingHistory(false);
     };
 
     loadMessages();
@@ -222,34 +225,42 @@ export default function Chat() {
 
       {/* Messages Container */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-        <AnimatePresence>
-          {messages.map((msg, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-            >
-              <div
-                className={`max-w-[70%] rounded-2xl p-4 ${
-                  msg.role === "user"
-                    ? "bg-blue-600 text-white rounded-br-none"
-                    : "bg-white text-gray-800 rounded-bl-none shadow-md"
-                }`}
+        {isLoadingHistory ? (
+          <div className="flex justify-center items-center h-full">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        ) : (
+          <AnimatePresence>
+            {messages.map((msg, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
-                <p className="text-sm mb-1">{msg.content}</p>
-                <p className={`text-xs ${msg.role === "user" ? "text-blue-100" : "text-gray-500"}`}>
-                  {msg.timestamp.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+                <div
+                  className={`max-w-[70%] rounded-2xl p-4 ${
+                    msg.role === "user"
+                      ? "bg-blue-600 text-white rounded-br-none"
+                      : "bg-white text-gray-800 rounded-bl-none shadow-md"
+                  }`}
+                >
+                  <p className="text-sm mb-1 whitespace-pre-wrap break-words">{msg.content}</p>
+                  <p
+                    className={`text-xs ${msg.role === "user" ? "text-blue-100" : "text-gray-500"}`}
+                  >
+                    {msg.timestamp.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        )}
 
         {isTyping && (
           <motion.div
