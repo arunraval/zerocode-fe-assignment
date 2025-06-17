@@ -99,3 +99,8 @@ B --> C{Next.js App};
 
     C --> R[app/components/Chat.tsx];
     R --> S(app/api/chat/route.ts);
+
+## test credentials
+
+Email: arun@gmail.com
+password: 123456
